@@ -20,6 +20,7 @@ $phone = $_SESSION['user_phone'];
 ?>
 
 
+
 <!DOCTYPE html>
 <html lang="en">
     <head>
@@ -130,13 +131,13 @@ $phone = $_SESSION['user_phone'];
                       <div class="profile_box">
                           <ul>
                               <li>
-                                  <a href="admin_profile.php">
+                                  <a href="profile.php">
                                       <i class="material-icons">person_outline</i>
                                       <span>Profile</span>
                                   </a>
                               </li>
                               <li>
-                                  <a href="admin_wallet_page.php">
+                                  <a href="wallet_page.php">
                                       <i class="material-icons">account_balance_wallet</i>
                                       <span>Wallet</span>
                                   </a>
@@ -190,73 +191,65 @@ $phone = $_SESSION['user_phone'];
         
             
       <aside class="sidebar">
-        <div class="wrapper">
+          <div class="wrapper">
 
 
-            <div class="sidebar_menu">
-                <ul>
-                    <li>
-                        <a href="admin_dashboard.php">
-                            <i class="material-icons">dashboard</i>
-                            <span>Home</span>
-                        </a>
-                    </li>
-                    <li>
-                        <a href="admin_swap.php">
-                            <i class="material-icons">swap_calls</i>
-                            <span>Swap</span>
-                        </a>
-                    </li>
+              <div class="sidebar_menu">
+                  <ul>
+                      <li>
+                          <a href="dashboard.php">
+                              <i class="material-icons">dashboard</i>
+                              <span>Home</span>
+                          </a>
+                      </li>
+                      <li>
+                          <a href="swap.php">
+                              <i class="material-icons">swap_calls</i>
+                              <span>Swap</span>
+                          </a>
+                      </li>
+                      <li>
+                          <a href="history.php">
+                              <i class="material-icons">history</i>
+                              <span>History</span>
+                          </a>
+                      </li>
+                      <li>
+                          <a href="features.php">
+                              <i class="material-icons">widgets</i>
+                              <span>Features</span>
+                          </a>
+                      </li>
+                      <li>
+                          <a href="market.php">
+                              <i class="material-icons">store</i>
+                              <span>Market</span>
+                          </a>
+                      </li>
+                  </ul>
+              </div>
 
-                    <li>
-                        <a href="users.php">
-                            <i class="fa fa-user-o"></i>
-                            <span>Users</span>
-                        </a>
-                    </li>
-
-                    <li>
-                        <a href="admin_history.php">
-                            <i class="material-icons">history</i>
-                            <span>History</span>
-                        </a>
-                    </li>
-                    <li>
-                        <a href="admin_features.php">
-                            <i class="material-icons">widgets</i>
-                            <span>Features</span>
-                        </a>
-                    </li>
-                    <li>
-                        <a href="admin_market.php">
-                            <i class="material-icons">store</i>
-                            <span>Market</span>
-                        </a>
-                    </li>
-                </ul>
-            </div>
-
-            <div class="sidebar_widgets">
-            <div class="wrapper">
-                <div class="image">
-                <img src="assets/images/crypto-join.png" alt="">
+              <div class="sidebar_widgets">
+                <div class="wrapper">
+                  <div class="image">
+                    <img src="assets/images/crypto-join.png" alt="">
+                  </div>
+                  <div class="text">
+                    <h3>Invest Now!</h3>
+                    <a href="">
+                      Buy and Sell Coins
+                    </a>
+                    <br><br>
+                  </div>
                 </div>
-                <div class="text">
-                <h3>Invest Now!</h3>
-                <a href="">
-                    Buy and Sell Coins
-                </a>
-                <br><br>
-                </div>
-            </div>
-            </div>
-        </div>
-    </aside>
+              </div>
+          </div>
+      </aside>
 
       <main class="main_content">
         <div class="app-container">
             <div class="profile-header">
-            <div class="profile-avatar">
+                <div class="profile-avatar">
                     <div class="avatar">
                         <span><?php echo htmlspecialchars(strtoupper(sprintf('%s', $user_fname[0]))); ?></span>
                          <span><?php echo htmlspecialchars(strtoupper(sprintf('%s', $user_lname[0]))); ?></span>
@@ -266,6 +259,9 @@ $phone = $_SESSION['user_phone'];
                 <h1><?php echo htmlspecialchars(strtoupper(sprintf('%s %s', $user_fname, $user_lname))); ?></h1>
                 <h4 class="email" id="user_id">ID: <?php echo htmlspecialchars($user_id); ?></h4>
                 <p class="location" ><?php echo htmlspecialchars($nationality); ?></p>
+                <span class="badge">
+                <?php echo htmlspecialchars($status); ?>
+                </span>
             </div>
 
             <nav class="quick-actions">
@@ -330,6 +326,10 @@ $phone = $_SESSION['user_phone'];
                     <button type="submit" name="update_profile" class="btn-primary">Update Profile</button>
                 </form>
             </section>
+            
+                <?php if ($update_success): ?>
+                    <p style="color: green;"><?php echo htmlspecialchars($update_success); ?></p>
+                <?php endif; ?>
 
     
             <section class="profile-section">
@@ -361,27 +361,37 @@ $phone = $_SESSION['user_phone'];
             
             <section class="profile-section">
                 <h2>KYC Information</h2>
-                <form class="profile-form">
+
+                <!-- Display feedback messages -->
+                <?php if (!empty($kyc_message)): ?>
+                    <div class="alert <?= strpos($kyc_message, 'successfully') !== false ? 'alert-success' : 'alert-danger'; ?>">
+                        <?= htmlspecialchars($kyc_message); ?>
+                    </div>
+                <?php endif; ?>
+
+                <!-- KYC Form -->
+                <form class="profile-form" action="" method="POST">
                     <div class="form-group">
-                        <label>Date of Birth</label>
-                        <input type="date" value="<?php echo htmlspecialchars($dob); ?>">
+                        <label for="dob">Date of Birth</label>
+                        <input type="date" name="dob" id="dob" value="<?= htmlspecialchars($dob); ?>" required>
                     </div>
                     <div class="form-group">
-                        <label>Address</label>
-                        <input type="text">
+                        <label for="address">Address</label>
+                        <input type="text" name="address" id="address" value="<?= htmlspecialchars($address); ?>" required>
                     </div>
                     <div class="form-group">
-                        <label>Government ID Type</label>
-                        <input type="text" placeholder="Passport">
+                        <label for="gov_id">Government ID Type</label>
+                        <input type="text" name="gov_id" id="gov_id" placeholder="Passport" value="<?= htmlspecialchars($gov_id); ?>" required>
                     </div>
                     <div class="form-group">
-                        <label>ID Number</label>
-                        <input type="text">
+                        <label for="id_number">ID Number</label>
+                        <input type="text" name="id_number" id="id_number" value="<?= htmlspecialchars($id_number); ?>" required>
                     </div>
-                    <button type="submit" class="btn-primary">Submit KYC</button>
-                    <a href="login.php"></a>
+                    <button type="submit" name="submit_kyc" class="btn-primary">Submit KYC</button>
                 </form>
             </section>
+            <br><br>
+
         </div>
         <script>
             import { getAuth, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/11.0.2/firebase-auth.js";
@@ -415,7 +425,7 @@ $phone = $_SESSION['user_phone'];
         });
     
         </script>
-    y
+    
       </main>
 
       
@@ -430,7 +440,7 @@ $phone = $_SESSION['user_phone'];
         <div class="wrapper">
             <ul>
                 <li>
-                    <a href="admin_dashboard.php">
+                    <a href="dashboard.php">
                         <i class="material-icons">dashboard</i>
                         <span>Home</span>
                     </a>
@@ -439,7 +449,7 @@ $phone = $_SESSION['user_phone'];
 
             <ul>
                 <li>
-                    <a href="admin_swap.php">
+                    <a href="swap.php">
                         <i class="material-icons">swap_calls</i>
                         <span>Swap</span>
                     </a>
@@ -448,7 +458,7 @@ $phone = $_SESSION['user_phone'];
 
             <ul>
                 <li>
-                    <a href="admin_history.php">
+                    <a href="history.php">
                         <i class="material-icons">history</i>
                         <span>History</span>
                     </a>
@@ -481,3 +491,4 @@ $phone = $_SESSION['user_phone'];
     <script src="assets/user/javascript/popup.js"></script>
 </body>
 </html>
+

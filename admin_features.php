@@ -540,7 +540,7 @@ addLoginNotification($user_lname);
 
         <div class="container">
             <div class="plans-container">
-            <div class="plans-card">
+                    <!-- <div class="plans-card">
                         <div class="plans-card-header">
                             <h5>${plan.name}
                             <div class="plans-card-dropdown">
@@ -568,7 +568,7 @@ addLoginNotification($user_lname);
                                 <button class="btn-invest">Invest Now</button>
                             </div>
                         </div>
-                    </div>
+                    </div> -->
 
                 
                             
@@ -1094,399 +1094,399 @@ addLoginNotification($user_lname);
             });
         }
 
-// Global variables to store the selected crypto's ID and Name
-let selectedCryptoId = null;
-let selectedCryptoName = null;
+        // Global variables to store the selected crypto's ID and Name
+        let selectedCryptoId = null;
+        let selectedCryptoName = null;
 
-// Function to fetch and populate cryptos dynamically
-function fetchAndPopulateCryptos(card, cardId) {
-    fetch('getCryptos.php', {
-        method: 'POST',
-        headers: {
-            'Content-Type': 'application/json',
-        },
-        body: JSON.stringify({ card_id: cardId }),
-    })
-    .then(response => response.json())
-    .then(data => {
-        if (data.success) {
-            const selectionOptions = card.querySelector('.selection-options');
-            selectionOptions.innerHTML = '';  // Clear existing options
+        // Function to fetch and populate cryptos dynamically
+        function fetchAndPopulateCryptos(card, cardId) {
+            fetch('getCryptos.php', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+                body: JSON.stringify({ card_id: cardId }),
+            })
+            .then(response => response.json())
+            .then(data => {
+                if (data.success) {
+                    const selectionOptions = card.querySelector('.selection-options');
+                    selectionOptions.innerHTML = '';  // Clear existing options
 
-            data.cryptos.forEach(crypto => {
-                const cryptoOption = document.createElement('a');
-                cryptoOption.textContent = `${crypto.crypto_name} (${crypto.symbol})`;
-                cryptoOption.setAttribute('data-crypto-id', crypto.crypto_id);
-                selectionOptions.appendChild(cryptoOption);
+                    data.cryptos.forEach(crypto => {
+                        const cryptoOption = document.createElement('a');
+                        cryptoOption.textContent = `${crypto.crypto_name} (${crypto.symbol})`;
+                        cryptoOption.setAttribute('data-crypto-id', crypto.crypto_id);
+                        selectionOptions.appendChild(cryptoOption);
 
-                // Add event listener to store the selected crypto's ID and Name
-                cryptoOption.addEventListener('click', function () {
-                    storeSelectedCryptoId(crypto.crypto_id, crypto.crypto_name);  // Store selected crypto ID
-                    updateHeaderContent(crypto);
-                    document.getElementById('plans-header').style.display = 'block';
-                    fetchAndDisplayPlans(crypto.crypto_id);  // Fetch and display plans based on selected crypto_id
-                });
-            });
-        } else {
-            console.error('Error fetching cryptos:', data.message);
-        }
-    })
-    .catch(error => {
-        console.error('Error fetching cryptos:', error);
-    });
-}
-
-// Function to store the selected crypto's ID and Name
-function storeSelectedCryptoId(cryptoId, cryptoName) {
-    selectedCryptoId = cryptoId;  // Store the selected crypto's ID
-    selectedCryptoName = cryptoName;  // Store the selected crypto's Name
-}
-
-// Function to update the header content with selected crypto name
-function updateHeaderContent(crypto) {
-    const headerLeft = document.querySelector('.header-left');
-    headerLeft.querySelector('h1').textContent = crypto.crypto_name;
-    fetchCryptoDetails(crypto.symbol);
-}
-
-// Function to fetch and display the crypto details (e.g., available balance)
-function fetchCryptoDetails(cryptoSymbol) {
-    fetch('getCryptoTransactions.php', {
-        method: 'POST',
-        headers: {
-            'Content-Type': 'application/json',
-        },
-        body: JSON.stringify({ crypto_symbol: cryptoSymbol }),
-    })
-    .then(response => response.json())
-    .then(data => {
-        if (data.success) {
-            const availableBalance = data.available_balance;
-            updateBalanceDisplay(availableBalance, cryptoSymbol);
-        } else {
-            console.error('Error fetching crypto details:', data.message);
-            updateBalanceDisplay(0, cryptoSymbol); // Default to 0 on error
-        }
-    })
-    .catch(error => {
-        console.error('Error fetching crypto details:', error);
-        updateBalanceDisplay(0, cryptoSymbol); // Default to 0 on error
-    });
-}
-
-// Function to update the balance display in the header
-function updateBalanceDisplay(availableBalance, cryptoSymbol) {
-    const headerLeft = document.querySelector('.header-left');
-    headerLeft.querySelector('h4').textContent = `Stake from $${availableBalance.toFixed(2)} (${cryptoSymbol}) wallet`;
-}
-
-// Function to fetch and display investment plans based on the selected crypto
-function fetchAndDisplayPlans(cryptoId) {
-    fetch('getPlans.php', {
-        method: 'POST',
-        headers: {
-            'Content-Type': 'application/json',
-        },
-        body: JSON.stringify({ crypto_id: cryptoId })
-    })
-    .then(response => response.json())
-    .then(data => {
-        const plansContainer = document.querySelector('.plans-container');
-        plansContainer.innerHTML = '';  // Clear any existing plans
-
-        if (data.success && data.plans.length > 0) {
-            data.plans.forEach((plan, index) => {
-                const planCard = `
-                    <div class="plans-card">
-                        <div class="plans-card-header">
-                            <h5>${plan.name}
-                            <div class="plans-card-dropdown">
-                                <div class="plans-card-dropdown-item edit_mining">Edit <span>${plan.name}</span></div>
-                                <div class="plans-card-dropdown-item delete_mining">Delete <span>${plan.name}</span></div>
-                            </div>
-                            </h5>
-                        </div>
-                        <div class="card-body">
-                            <div class="price-range">
-                                <h2>$${parseFloat(plan.minimum).toFixed(2)}</h2>
-                                <i class="fas fa-long-arrow-alt-down"></i>
-                                <h2>$${parseFloat(plan.maximum).toFixed(2)}</h2>
-                            </div>
-                            <h6>Includes:</h6>
-                            <ul>
-                                <li>${parseFloat(plan.roi).toFixed(2)}% ROI</li>
-                                <li>Contract: ${plan.duration_timeframe} Day(s)</li>
-                                <li>Commission: ${parseFloat(plan.commission).toFixed(2)}%</li>
-                                <li>Benefit: ${plan.benefit}</li>
-                            </ul>
-                            <div class="button-wrapper">
-                                <button class="btn-invest">Invest Now</button>
-                            </div>
-                        </div>
-                    </div>
-                `;
-                plansContainer.insertAdjacentHTML('beforeend', planCard);
-            });
-
-            // Now, after the plans are added, add the event listeners for toggling dropdowns
-            const planCardHeader = document.querySelectorAll('.plans-card-header');
-            const planCardDropdown = document.querySelectorAll('.plans-card-dropdown');
-
-            planCardHeader.forEach((card, index) => {
-                card.addEventListener('click', () => {
-                    planCardDropdown.forEach((dropdown, dropdownIndex) => {
-                        if (dropdownIndex === index) {
-                            dropdown.style.display = dropdown.style.display === 'block' ? 'none' : 'block';
-                        } else {
-                            dropdown.style.display = 'none';
-                        }
+                        // Add event listener to store the selected crypto's ID and Name
+                        cryptoOption.addEventListener('click', function () {
+                            storeSelectedCryptoId(crypto.crypto_id, crypto.crypto_name);  // Store selected crypto ID
+                            updateHeaderContent(crypto);
+                            document.getElementById('plans-header').style.display = 'block';
+                            fetchAndDisplayPlans(crypto.crypto_id);  // Fetch and display plans based on selected crypto_id
+                        });
                     });
+                } else {
+                    console.error('Error fetching cryptos:', data.message);
+                }
+            })
+            .catch(error => {
+                console.error('Error fetching cryptos:', error);
+            });
+        }
+
+        // Function to store the selected crypto's ID and Name
+        function storeSelectedCryptoId(cryptoId, cryptoName) {
+            selectedCryptoId = cryptoId;  // Store the selected crypto's ID
+            selectedCryptoName = cryptoName;  // Store the selected crypto's Name
+        }
+
+        // Function to update the header content with selected crypto name
+        function updateHeaderContent(crypto) {
+            const headerLeft = document.querySelector('.header-left');
+            headerLeft.querySelector('h1').textContent = crypto.crypto_name;
+            fetchCryptoDetails(crypto.symbol);
+        }
+
+        // Function to fetch and display the crypto details (e.g., available balance)
+        function fetchCryptoDetails(cryptoSymbol) {
+            fetch('getCryptoTransactions.php', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+                body: JSON.stringify({ crypto_symbol: cryptoSymbol }),
+            })
+            .then(response => response.json())
+            .then(data => {
+                if (data.success) {
+                    const availableBalance = data.available_balance;
+                    updateBalanceDisplay(availableBalance, cryptoSymbol);
+                } else {
+                    console.error('Error fetching crypto details:', data.message);
+                    updateBalanceDisplay(0, cryptoSymbol); // Default to 0 on error
+                }
+            })
+            .catch(error => {
+                console.error('Error fetching crypto details:', error);
+                updateBalanceDisplay(0, cryptoSymbol); // Default to 0 on error
+            });
+        }
+
+        // Function to update the balance display in the header
+        function updateBalanceDisplay(availableBalance, cryptoSymbol) {
+            const headerLeft = document.querySelector('.header-left');
+            headerLeft.querySelector('h4').textContent = `Stake from $${availableBalance.toFixed(2)} (${cryptoSymbol}) wallet`;
+        }
+
+        // Function to fetch and display investment plans based on the selected crypto
+        function fetchAndDisplayPlans(cryptoId) {
+            fetch('getPlans.php', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+                body: JSON.stringify({ crypto_id: cryptoId })
+            })
+            .then(response => response.json())
+            .then(data => {
+                const plansContainer = document.querySelector('.plans-container');
+                plansContainer.innerHTML = '';  // Clear any existing plans
+
+                if (data.success && data.plans.length > 0) {
+                    data.plans.forEach((plan, index) => {
+                        const planCard = `
+                            <div class="plans-card">
+                                <div class="plans-card-header">
+                                    <h5>${plan.name}
+                                    <div class="plans-card-dropdown">
+                                        <div class="plans-card-dropdown-item edit_mining">Edit <span>${plan.name}</span></div>
+                                        <div class="plans-card-dropdown-item delete_mining">Delete <span>${plan.name}</span></div>
+                                    </div>
+                                    </h5>
+                                </div>
+                                <div class="card-body">
+                                    <div class="price-range">
+                                        <h2>$${parseFloat(plan.minimum).toFixed(2)}</h2>
+                                        <i class="fas fa-long-arrow-alt-down"></i>
+                                        <h2>$${parseFloat(plan.maximum).toFixed(2)}</h2>
+                                    </div>
+                                    <h6>Includes:</h6>
+                                    <ul>
+                                        <li>${parseFloat(plan.roi).toFixed(2)}% ROI</li>
+                                        <li>Contract: ${plan.duration_timeframe} Day(s)</li>
+                                        <li>Commission: ${parseFloat(plan.commission).toFixed(2)}%</li>
+                                        <li>Benefit: ${plan.benefit}</li>
+                                    </ul>
+                                    <div class="button-wrapper">
+                                        <button class="btn-invest">Invest Now</button>
+                                    </div>
+                                </div>
+                            </div>
+                        `;
+                        plansContainer.insertAdjacentHTML('beforeend', planCard);
+                    });
+
+                    // Now, after the plans are added, add the event listeners for toggling dropdowns
+                    const planCardHeader = document.querySelectorAll('.plans-card-header');
+                    const planCardDropdown = document.querySelectorAll('.plans-card-dropdown');
+
+                    planCardHeader.forEach((card, index) => {
+                        card.addEventListener('click', () => {
+                            planCardDropdown.forEach((dropdown, dropdownIndex) => {
+                                if (dropdownIndex === index) {
+                                    dropdown.style.display = dropdown.style.display === 'block' ? 'none' : 'block';
+                                } else {
+                                    dropdown.style.display = 'none';
+                                }
+                            });
+                        });
+                    });
+                } else {
+                    plansContainer.innerHTML = '<p>No plans available for this cryptocurrency.</p>';
+                }
+            })
+            .catch(error => {
+                console.error('Error fetching plans:', error);
+            });
+        }
+
+        // Event listener for the "Back" button to refresh the page
+        document.querySelector('.btn-back').addEventListener('click', function() {
+            location.reload();  // Reload the page to refresh everything
+        });
+
+
+
+
+
+            // Open the edit modal and populate it with the selected crypto's details
+            function openEditModal(cryptoId, cryptoName, symbol) {
+                selectedCryptoId = cryptoId; // Store the selected crypto's ID
+                document.getElementById('edit_crypto_name').value = cryptoName;
+                document.getElementById('edit_symbol').value = symbol;
+                document.getElementById('editModal').style.display = 'block';  // Show the modal
+            }
+
+            // Close the modal
+            document.getElementById('close_edit_modal').addEventListener('click', () => {
+                document.getElementById('editModal').style.display = 'none';  // Hide the modal
+            });
+
+            // Confirm the edit when the "Edit" button is clicked
+            document.getElementById('confirm_edit_crypto').addEventListener('click', function() {
+                const cryptoNameInput = document.querySelector('#edit_crypto_name');
+                const symbolInput = document.querySelector('#edit_symbol');
+                const cryptoName = cryptoNameInput.value.trim();
+                const symbol = symbolInput.value.trim();
+
+                if (!cryptoName || !symbol) {
+                    alert('Please fill in both the Crypto Name and Symbol.');
+                    return;
+                }
+
+                // Send the updated data to the server to update the crypto
+                fetch('editCrypto.php', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({
+                        crypto_id: selectedCryptoId,
+                        crypto_name: cryptoName,
+                        symbol: symbol
+                    }),
+                })
+                .then(response => response.json())
+                .then(data => {
+                    if (data.success) {
+                        // Update the selected option in the list
+                        const cryptoOption = document.querySelector(`[data-crypto-id="${selectedCryptoId}"]`);
+                        if (cryptoOption) {
+                            cryptoOption.textContent = `${cryptoName} (${symbol})`;
+                        }
+
+                        document.getElementById('editModal').style.display = 'none';  // Hide the modal
+
+                        // Show success Toastify notification
+                        Toastify({
+                            text: "Crypto updated successfully!",
+                            duration: 3000,  // Show the toast for 3 seconds
+                            close: true,
+                            gravity: "top",
+                            position: "right",
+                            backgroundColor: "linear-gradient(to right, #00b09b, #96c93d)", // Green success background
+                        }).showToast();
+
+                        // Delay the reload to allow the toast to be visible
+                        setTimeout(() => {
+                            window.location.href = window.location.href; // Reload the page
+                        }, 3000); // 3 seconds delay to match the toast duration
+                    } else {
+                        // Show error Toastify notification
+                        Toastify({
+                            text: "Error: " + data.message,
+                            duration: 5000,
+                            close: true,
+                            gravity: "top",
+                            position: "right",
+                            backgroundColor: "linear-gradient(to right, #ff5f6d, #ffc371)", // Red/yellow error background
+                        }).showToast();
+                    }
+                    })
+                    .catch(error => {
+                        // Show error Toastify notification for fetch errors
+                        Toastify({
+                            text: "An error occurred. Please try again.",
+                            duration: 5000,
+                            close: true,
+                            gravity: "top",
+                            position: "right",
+                            backgroundColor: "linear-gradient(to right, #ff5f6d, #ffc371)", // Red/yellow error background
+                        }).showToast();
+                    });
+
+            });
+            // Function to open the delete modal and populate it with the selected crypto's details
+            function openDeleteModal(cryptoId, cryptoName) {
+                selectedCryptoId = cryptoId; // Store the selected crypto's ID
+                document.getElementById('cryptoName').textContent = cryptoName;
+                document.getElementById('deleteModal').style.display = 'block';  // Show the modal
+            }
+
+            // Event listener for the "Confirm Delete" button
+            document.getElementById('confirmDelete').addEventListener('click', function () {
+                if (!selectedCryptoId) {
+                    alert('Invalid crypto ID. Please try again.');
+                    return;
+                }
+
+                // Send delete request to the server with the selected cryptoId
+                fetch('deleteCrypto.php', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ crypto_id: selectedCryptoId }),  // Send selectedCryptoId to delete
+                })
+                .then(response => response.json())
+                .then(data => {
+                    if (data.success) {
+                        // Successfully deleted, remove the crypto from the list in the UI
+                        const cryptoElement = document.querySelector(`[data-crypto-id="${selectedCryptoId}"]`);
+                        if (cryptoElement) {
+                            cryptoElement.remove(); // Remove the crypto option from the DOM
+                        }
+
+                        // Show success Toastify notification
+                        Toastify({
+                            text: "Crypto deleted successfully!",
+                            duration: 3000,  // Toast will be visible for 3 seconds
+                            close: true,
+                            gravity: "top",
+                            position: "right",
+                            backgroundColor: "linear-gradient(to right, #00b09b, #96c93d)", // Green success background
+                        }).showToast();
+
+                        closeDeleteModal();  // Close the modal
+
+                        // Reload the page after the toast
+                        setTimeout(() => {
+                            window.location.href = window.location.href; // Reload the page
+                        }, 3000); // Wait for the toast to be visible before reloading
+                    } else {
+                        // Show error Toastify notification
+                        Toastify({
+                            text: `Error: ${data.message}`,
+                            duration: 5000,  // Toast will be visible for 5 seconds
+                            close: true,
+                            gravity: "top",
+                            position: "right",
+                            backgroundColor: "linear-gradient(to right, #ff5f6d, #ffc371)", // Red/yellow error background
+                        }).showToast();
+                    }
+                    })
+                    .catch(error => {
+                        console.error('Deletion error:', error);
+
+                        // Show error Toastify notification for fetch errors
+                        Toastify({
+                            text: 'An error occurred. Please try again.',
+                            duration: 5000,  // Toast will be visible for 5 seconds
+                            close: true,
+                            gravity: "top",
+                            position: "right",
+                            backgroundColor: "linear-gradient(to right, #ff5f6d, #ffc371)", // Red/yellow error background
+                        }).showToast();
+                    });
+
+            });
+
+            // Event listener for the "Cancel" button to close the modal
+            document.getElementById('cancelDelete').addEventListener('click', closeDeleteModal);
+
+            // Function to close the delete modal
+            function closeDeleteModal() {
+                const modal = document.getElementById('deleteModal');
+                modal.style.display = 'none';  // Hide the modal
+            }
+
+            document.getElementById('addPlanForm').addEventListener('submit', function (e) {
+                e.preventDefault(); // Prevent form submission
+
+                const formData = new FormData(this); // Collect all form data
+                const submitButton = document.getElementById('edit_btn');
+                
+                // Disable the submit button to prevent multiple clicks
+                submitButton.disabled = true;
+                submitButton.textContent = "Processing...";
+
+                fetch('addPlan.php', {
+                    method: 'POST',
+                    body: formData
+                })
+                .then(response => response.json()) // Expect JSON response from PHP
+                .then(data => {
+                    submitButton.disabled = false;
+                    submitButton.textContent = "Add New";
+
+                    if (data.success) {
+                        // Show success notification
+                        Toastify({
+                            text: "Investment plan added successfully!",
+                            duration: 3000,
+                            close: true,
+                            gravity: "top",
+                            position: "right",
+                            backgroundColor: "linear-gradient(to right, #00b09b, #96c93d)",
+                        }).showToast();
+
+                        // Optionally clear the form
+                        document.getElementById('addPlanForm').reset();
+                    } else {
+                        // Show error notification
+                        Toastify({
+                            text: "Error: " + data.message,
+                            duration: 5000,
+                            close: true,
+                            gravity: "top",
+                            position: "right",
+                            backgroundColor: "linear-gradient(to right, #ff5f6d, #ffc371)",
+                        }).showToast();
+                    }
+                })
+                .catch(error => {
+                    submitButton.disabled = false;
+                    submitButton.textContent = "Add New";
+
+                    // Handle fetch errors
+                    Toastify({
+                        text: "An error occurred: " + error.message,
+                        duration: 5000,
+                        close: true,
+                        gravity: "top",
+                        position: "right",
+                        backgroundColor: "linear-gradient(to right, #ff5f6d, #ffc371)",
+                    }).showToast();
                 });
             });
-        } else {
-            plansContainer.innerHTML = '<p>No plans available for this cryptocurrency.</p>';
-        }
-    })
-    .catch(error => {
-        console.error('Error fetching plans:', error);
-    });
-}
-
-// Event listener for the "Back" button to refresh the page
-document.querySelector('.btn-back').addEventListener('click', function() {
-    location.reload();  // Reload the page to refresh everything
-});
-
-
-
-
-
-// Open the edit modal and populate it with the selected crypto's details
-function openEditModal(cryptoId, cryptoName, symbol) {
-    selectedCryptoId = cryptoId; // Store the selected crypto's ID
-    document.getElementById('edit_crypto_name').value = cryptoName;
-    document.getElementById('edit_symbol').value = symbol;
-    document.getElementById('editModal').style.display = 'block';  // Show the modal
-}
-
-// Close the modal
-document.getElementById('close_edit_modal').addEventListener('click', () => {
-    document.getElementById('editModal').style.display = 'none';  // Hide the modal
-});
-
-// Confirm the edit when the "Edit" button is clicked
-document.getElementById('confirm_edit_crypto').addEventListener('click', function() {
-    const cryptoNameInput = document.querySelector('#edit_crypto_name');
-    const symbolInput = document.querySelector('#edit_symbol');
-    const cryptoName = cryptoNameInput.value.trim();
-    const symbol = symbolInput.value.trim();
-
-    if (!cryptoName || !symbol) {
-        alert('Please fill in both the Crypto Name and Symbol.');
-        return;
-    }
-
-    // Send the updated data to the server to update the crypto
-    fetch('editCrypto.php', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({
-            crypto_id: selectedCryptoId,
-            crypto_name: cryptoName,
-            symbol: symbol
-        }),
-    })
-    .then(response => response.json())
-    .then(data => {
-        if (data.success) {
-            // Update the selected option in the list
-            const cryptoOption = document.querySelector(`[data-crypto-id="${selectedCryptoId}"]`);
-            if (cryptoOption) {
-                cryptoOption.textContent = `${cryptoName} (${symbol})`;
-            }
-
-            document.getElementById('editModal').style.display = 'none';  // Hide the modal
-
-            // Show success Toastify notification
-            Toastify({
-                text: "Crypto updated successfully!",
-                duration: 3000,  // Show the toast for 3 seconds
-                close: true,
-                gravity: "top",
-                position: "right",
-                backgroundColor: "linear-gradient(to right, #00b09b, #96c93d)", // Green success background
-            }).showToast();
-
-            // Delay the reload to allow the toast to be visible
-            setTimeout(() => {
-                window.location.href = window.location.href; // Reload the page
-            }, 3000); // 3 seconds delay to match the toast duration
-        } else {
-            // Show error Toastify notification
-            Toastify({
-                text: "Error: " + data.message,
-                duration: 5000,
-                close: true,
-                gravity: "top",
-                position: "right",
-                backgroundColor: "linear-gradient(to right, #ff5f6d, #ffc371)", // Red/yellow error background
-            }).showToast();
-        }
-        })
-        .catch(error => {
-            // Show error Toastify notification for fetch errors
-            Toastify({
-                text: "An error occurred. Please try again.",
-                duration: 5000,
-                close: true,
-                gravity: "top",
-                position: "right",
-                backgroundColor: "linear-gradient(to right, #ff5f6d, #ffc371)", // Red/yellow error background
-            }).showToast();
-        });
-
-});
-// Function to open the delete modal and populate it with the selected crypto's details
-function openDeleteModal(cryptoId, cryptoName) {
-    selectedCryptoId = cryptoId; // Store the selected crypto's ID
-    document.getElementById('cryptoName').textContent = cryptoName;
-    document.getElementById('deleteModal').style.display = 'block';  // Show the modal
-}
-
-// Event listener for the "Confirm Delete" button
-document.getElementById('confirmDelete').addEventListener('click', function () {
-    if (!selectedCryptoId) {
-        alert('Invalid crypto ID. Please try again.');
-        return;
-    }
-
-    // Send delete request to the server with the selected cryptoId
-    fetch('deleteCrypto.php', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ crypto_id: selectedCryptoId }),  // Send selectedCryptoId to delete
-    })
-    .then(response => response.json())
-    .then(data => {
-        if (data.success) {
-            // Successfully deleted, remove the crypto from the list in the UI
-            const cryptoElement = document.querySelector(`[data-crypto-id="${selectedCryptoId}"]`);
-            if (cryptoElement) {
-                cryptoElement.remove(); // Remove the crypto option from the DOM
-            }
-
-            // Show success Toastify notification
-            Toastify({
-                text: "Crypto deleted successfully!",
-                duration: 3000,  // Toast will be visible for 3 seconds
-                close: true,
-                gravity: "top",
-                position: "right",
-                backgroundColor: "linear-gradient(to right, #00b09b, #96c93d)", // Green success background
-            }).showToast();
-
-            closeDeleteModal();  // Close the modal
-
-            // Reload the page after the toast
-            setTimeout(() => {
-                window.location.href = window.location.href; // Reload the page
-            }, 3000); // Wait for the toast to be visible before reloading
-        } else {
-            // Show error Toastify notification
-            Toastify({
-                text: `Error: ${data.message}`,
-                duration: 5000,  // Toast will be visible for 5 seconds
-                close: true,
-                gravity: "top",
-                position: "right",
-                backgroundColor: "linear-gradient(to right, #ff5f6d, #ffc371)", // Red/yellow error background
-            }).showToast();
-        }
-        })
-        .catch(error => {
-            console.error('Deletion error:', error);
-
-            // Show error Toastify notification for fetch errors
-            Toastify({
-                text: 'An error occurred. Please try again.',
-                duration: 5000,  // Toast will be visible for 5 seconds
-                close: true,
-                gravity: "top",
-                position: "right",
-                backgroundColor: "linear-gradient(to right, #ff5f6d, #ffc371)", // Red/yellow error background
-            }).showToast();
-        });
-
-});
-
-// Event listener for the "Cancel" button to close the modal
-document.getElementById('cancelDelete').addEventListener('click', closeDeleteModal);
-
-// Function to close the delete modal
-function closeDeleteModal() {
-    const modal = document.getElementById('deleteModal');
-    modal.style.display = 'none';  // Hide the modal
-}
-
-document.getElementById('addPlanForm').addEventListener('submit', function (e) {
-    e.preventDefault(); // Prevent form submission
-
-    const formData = new FormData(this); // Collect all form data
-    const submitButton = document.getElementById('edit_btn');
-    
-    // Disable the submit button to prevent multiple clicks
-    submitButton.disabled = true;
-    submitButton.textContent = "Processing...";
-
-    fetch('addPlan.php', {
-        method: 'POST',
-        body: formData
-    })
-    .then(response => response.json()) // Expect JSON response from PHP
-    .then(data => {
-        submitButton.disabled = false;
-        submitButton.textContent = "Add New";
-
-        if (data.success) {
-            // Show success notification
-            Toastify({
-                text: "Investment plan added successfully!",
-                duration: 3000,
-                close: true,
-                gravity: "top",
-                position: "right",
-                backgroundColor: "linear-gradient(to right, #00b09b, #96c93d)",
-            }).showToast();
-
-            // Optionally clear the form
-            document.getElementById('addPlanForm').reset();
-        } else {
-            // Show error notification
-            Toastify({
-                text: "Error: " + data.message,
-                duration: 5000,
-                close: true,
-                gravity: "top",
-                position: "right",
-                backgroundColor: "linear-gradient(to right, #ff5f6d, #ffc371)",
-            }).showToast();
-        }
-    })
-    .catch(error => {
-        submitButton.disabled = false;
-        submitButton.textContent = "Add New";
-
-        // Handle fetch errors
-        Toastify({
-            text: "An error occurred: " + error.message,
-            duration: 5000,
-            close: true,
-            gravity: "top",
-            position: "right",
-            backgroundColor: "linear-gradient(to right, #ff5f6d, #ffc371)",
-        }).showToast();
-    });
-});
 
 
 

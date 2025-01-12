@@ -37,3 +37,8 @@ Received data: Array
     [crypto_id] => 17
 )
 
+Received data: Array
+(
+    [crypto_id] => 19
+)
+
