@@ -17,3 +17,23 @@ Received data: Array
     [crypto_id] => 3
 )
 
+Received data: Array
+(
+    [crypto_id] => 10
+)
+
+Received data: Array
+(
+    [crypto_id] => 12
+)
+
+Received data: Array
+(
+    [crypto_id] => 14
+)
+
+Received data: Array
+(
+    [crypto_id] => 17
+)
+

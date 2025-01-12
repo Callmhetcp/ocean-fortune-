@@ -372,7 +372,7 @@ addLoginNotification($user_lname);
         <!-- Delete Confirmation Modal -->
         <div class="modal" id="deleteModal">
             <div class="modal-content">
-                <h2 class="modal-title">Confirm Deletion</h2>
+                <h2 class="modal-title">Confirm Delete</h2>
                 <p>Are you sure you want to delete this investment?</p>
                 <div class="modal-buttons">
                     <button class="modal-button cancel" id="cancelDeleteButton">Cancel</button>
@@ -517,8 +517,8 @@ addLoginNotification($user_lname);
             <!-- DELETE PLAN -->
             <div class="modal delete_plan_popup" id="deleteModal">
                 <div class="modal-content">
-                    <h2 class="modal-title">Confirm Deletion</h2>
-                    <p>Are you sure you want to delete <span id="cryptoName">XRP?</span></p>
+                    <h2 class="modal-title">Confirm Delete</h2>
+                    <p>Are you sure you want to delete <span id="cryptoName"></span></p>
                     <div class="modal-buttons">
                         <button class="close_delete_plan_popup modal-button cancel" id="cancelDelete">Cancel</button>
                         <button id="confirmDelete" class="modal-button confirm">Confirm</button>
@@ -573,7 +573,7 @@ addLoginNotification($user_lname);
                 
                             
             <!-- EDIT MINING -->
-            <section class="edit_mining_popup action_overlay" id="">
+            <section class="edit_mining_popup action_overlay" style="visibility: hidden; opacity: 0; pointer-events: none;">
                 <div class="wrapper">
                     <header>
                         <h4>
@@ -744,44 +744,92 @@ addLoginNotification($user_lname);
                     })
                     .then(response => response.json()) // Parse the JSON response
                     .then(data => {
-                        console.log(data); // Log the response for debugging purposes
                         if (data.success) {
-                            alert('Investment table created successfully!');
+                            // Show success Toastify notification
+                            Toastify({
+                                text: "Investment table created successfully!",
+                                duration: 3000,
+                                close: true,
+                                gravity: "top",
+                                position: "right",
+                                backgroundColor: "linear-gradient(to right, #00b09b, #96c93d)", // Green success background
+                            }).showToast();
+
                             const newCard = createCard(name); // Create a new card with the investment name
                             cardsContainer.appendChild(newCard); // Add the new card to the container
                             createModal.classList.remove('active'); // Close the modal
                         } else {
-                            alert('Error: ' + data.message); // Display error message from backend
+                            // Show error Toastify notification
+                            Toastify({
+                                text: "Error: " + data.message,
+                                duration: 5000,
+                                close: true,
+                                gravity: "top",
+                                position: "right",
+                                backgroundColor: "linear-gradient(to right, #ff5f6d, #ffc371)", // Red/yellow error background
+                            }).showToast();
                         }
                     })
                     .catch(error => {
-                        console.error('Error:', error); // Log any errors
-                        alert('An error occurred. Please try again.'); // Display a generic error message
+                        // Show error Toastify notification for any other errors
+                        Toastify({
+                            text: "An error occurred: " + error.message,
+                            duration: 5000,
+                            close: true,
+                            gravity: "top",
+                            position: "right",
+                            backgroundColor: "linear-gradient(to right, #ff5f6d, #ffc371)", // Red/yellow error background
+                        }).showToast();
                     });
                 } else {
-                    alert('Please enter an investment name.'); // Validate input
+                    // Show error Toastify notification for empty input
+                    Toastify({
+                        text: "Please enter an investment name.",
+                        duration: 3000,
+                        close: true,
+                        gravity: "top",
+                        position: "right",
+                        backgroundColor: "linear-gradient(to right, #ff5f6d, #ffc371)", // Red/yellow error background
+                    }).showToast();
                 }
             });
 
 
-            // Fetch and display investments from the database
+           // Fetch and display investments from the database
             function fetchInvestments() {
-            fetch('fetch_investments.php')
-                .then(response => response.json())
-                .then(data => {
-                    if (data.success && data.investments.length > 0) {
-                        data.investments.forEach(investment => {
-                            const newCard = createCard(investment.investment_name, investment.card_id);
-                            cardsContainer.appendChild(newCard);
-                        });
-                    } else {
-                        console.log('No investments found.');
-                    }
-                })
-                .catch(error => {
-                    console.error('Error fetching investments:', error);
-                });
-        }
+                fetch('fetch_investments.php')
+                    .then(response => response.json())
+                    .then(data => {
+                        if (data.success && data.investments.length > 0) {
+                            data.investments.forEach(investment => {
+                                const newCard = createCard(investment.investment_name, investment.card_id);
+                                cardsContainer.appendChild(newCard);
+                            });
+                        } else {
+                            // Show Toastify notification when no investments are found
+                            Toastify({
+                                text: "No investments found.",
+                                duration: 3000,
+                                close: true,
+                                gravity: "top",
+                                position: "right",
+                                backgroundColor: "linear-gradient(to right, #ff5f6d, #ffc371)", // Red/yellow error background
+                            }).showToast();
+                        }
+                    })
+                    .catch(error => {
+                        // Show Toastify notification for fetch errors
+                        Toastify({
+                            text: "Error fetching investments: " + error.message,
+                            duration: 5000,
+                            close: true,
+                            gravity: "top",
+                            position: "right",
+                            backgroundColor: "linear-gradient(to right, #ff5f6d, #ffc371)", // Red/yellow error background
+                        }).showToast();
+                    });
+            }
+
 
 
         function createCard(name, id) {
@@ -849,19 +897,54 @@ addLoginNotification($user_lname);
                                 if (data.success) {
                                     currentCard.querySelector('.card-title').textContent = newName; // Update UI
                                     editModal.classList.remove('active');
-                                    alert('Investment updated successfully!');
+                                    
+                                    // Show success Toastify notification
+                                    Toastify({
+                                        text: "Investment updated successfully!",
+                                        duration: 3000,
+                                        close: true,
+                                        gravity: "top",
+                                        position: "right",
+                                        backgroundColor: "linear-gradient(to right, #00b09b, #96c93d)",
+                                    }).showToast();
                                 } else {
-                                    alert('Error: ' + data.message);
+                                    // Show error Toastify notification
+                                    Toastify({
+                                        text: "Error: " + data.message,
+                                        duration: 5000,
+                                        close: true,
+                                        gravity: "top",
+                                        position: "right",
+                                        backgroundColor: "linear-gradient(to right, #ff5f6d, #ffc371)",
+                                    }).showToast();
                                 }
                             })
-                            .catch(error => alert('An error occurred. Please try again.'))
+                            .catch(error => {
+                                // Handle network or fetch errors with Toastify
+                                Toastify({
+                                    text: "An error occurred: " + error.message,
+                                    duration: 5000,
+                                    close: true,
+                                    gravity: "top",
+                                    position: "right",
+                                    backgroundColor: "linear-gradient(to right, #ff5f6d, #ffc371)",
+                                }).showToast();
+                            })
                             .finally(() => {
                                 confirmEditButton.removeEventListener('click', confirmEditHandler); // Clean up listener
                             });
-                    } else {
-                        alert('Invalid input or investment ID.');
-                    }
-                });
+                        } else {
+                            // Show validation error Toastify notification
+                            Toastify({
+                                text: "Invalid input or investment ID.",
+                                duration: 3000,
+                                close: true,
+                                gravity: "top",
+                                position: "right",
+                                backgroundColor: "linear-gradient(to right, #ff5f6d, #ffc371)",
+                            }).showToast();
+                        }
+                    });
             });
 
             // Delete investment
@@ -881,17 +964,44 @@ addLoginNotification($user_lname);
                             if (data.success) {
                                 card.remove(); // Remove the card from the DOM
                                 deleteModal.classList.remove('active');
-                                alert('Investment deleted successfully!');
+                                // Show success Toastify notification
+                                Toastify({
+                                    text: "Investment deleted successfully!",
+                                    duration: 3000,
+                                    close: true,
+                                    gravity: "top",
+                                    position: "right",
+                                    backgroundColor: "linear-gradient(to right, #00b09b, #96c93d)", // Green success background
+                                }).showToast();
                             } else {
-                                alert('Error: ' + data.message);
+                                // Show error Toastify notification
+                                Toastify({
+                                    text: "Error: " + data.message,
+                                    duration: 5000,
+                                    close: true,
+                                    gravity: "top",
+                                    position: "right",
+                                    backgroundColor: "linear-gradient(to right, #ff5f6d, #ffc371)", // Red/yellow error background
+                                }).showToast();
                             }
                         })
-                        .catch(error => alert('An error occurred. Please try again.'))
+                        .catch(error => {
+                            // Show error Toastify notification for fetch errors
+                            Toastify({
+                                text: "An error occurred. Please try again.",
+                                duration: 5000,
+                                close: true,
+                                gravity: "top",
+                                position: "right",
+                                backgroundColor: "linear-gradient(to right, #ff5f6d, #ffc371)", // Red/yellow error background
+                            }).showToast();
+                        })
                         .finally(() => {
                             confirmDeleteButton.removeEventListener('click', confirmDeleteHandler); // Clean up listener
                         });
                 });
             });
+
 
             // Add Option
             addOptionButton.addEventListener('click', () => {
@@ -906,7 +1016,15 @@ addLoginNotification($user_lname);
                     const symbol = symbolInput.value.trim();
 
                     if (!cryptoName || !symbol) {
-                        alert('Please fill in both the Crypto Name and Symbol.');
+                        // Show error Toastify notification
+                        Toastify({
+                            text: "Please fill in both the Crypto Name and Symbol.",
+                            duration: 5000,
+                            close: true,
+                            gravity: "top",
+                            position: "right",
+                            backgroundColor: "linear-gradient(to right, #ff5f6d, #ffc371)", // Red/yellow error background
+                        }).showToast();
                         return;
                     }
 
@@ -923,13 +1041,42 @@ addLoginNotification($user_lname);
                                 selectionOptions.appendChild(newOption);
                                 cryptoNameInput.value = '';
                                 symbolInput.value = '';
-                                alert('Crypto added successfully!');
-                                window.location.href = window.location.href; 
+                                // Show success Toastify notification
+                                Toastify({
+                                    text: "Crypto added successfully!",
+                                    duration: 3000,
+                                    close: true,
+                                    gravity: "top",
+                                    position: "right",
+                                    backgroundColor: "linear-gradient(to right, #00b09b, #96c93d)", // Green success background
+                                }).showToast();
+                                // Delay the page reload to show the toast
+                                setTimeout(() => {
+                                    window.location.href = window.location.href; // Reload page after success
+                                }, 3000); // Delay for the duration of the toast
                             } else {
-                                alert('Error: ' + data.message);
+                                // Show error Toastify notification
+                                Toastify({
+                                    text: "Error: " + data.message,
+                                    duration: 5000,
+                                    close: true,
+                                    gravity: "top",
+                                    position: "right",
+                                    backgroundColor: "linear-gradient(to right, #ff5f6d, #ffc371)", // Red/yellow error background
+                                }).showToast();
                             }
                         })
-                        .catch(error => alert('An error occurred. Please try again.'))
+                        .catch(error => {
+                            // Show error Toastify notification for fetch errors
+                            Toastify({
+                                text: "An error occurred. Please try again.",
+                                duration: 5000,
+                                close: true,
+                                gravity: "top",
+                                position: "right",
+                                backgroundColor: "linear-gradient(to right, #ff5f6d, #ffc371)", // Red/yellow error background
+                            }).showToast();
+                        })
                         .finally(() => {
                             confirmAddOptionButton.removeEventListener('click', confirmAddOptionHandler); // Clean up listener
                         });
@@ -1053,10 +1200,10 @@ function fetchAndDisplayPlans(cryptoId) {
                     <div class="plans-card">
                         <div class="plans-card-header">
                             <h5>${plan.name}
-                                <div class="plans-card-dropdown">
-                                    <div class="plans-card-dropdown-item edit_mining">Edit <span>${plan.name}</span> Mining</div>
-                                    <div class="plans-card-dropdown-item delete_mining">Delete <span>${plan.name}</span> Mining</div>
-                                </div>
+                            <div class="plans-card-dropdown">
+                                <div class="plans-card-dropdown-item edit_mining">Edit <span>${plan.name}</span></div>
+                                <div class="plans-card-dropdown-item delete_mining">Delete <span>${plan.name}</span></div>
+                            </div>
                             </h5>
                         </div>
                         <div class="card-body">
@@ -1068,7 +1215,7 @@ function fetchAndDisplayPlans(cryptoId) {
                             <h6>Includes:</h6>
                             <ul>
                                 <li>${parseFloat(plan.roi).toFixed(2)}% ROI</li>
-                                <li>Contract: ${plan.earning_duration} ${plan.duration_timeframe}(s)</li>
+                                <li>Contract: ${plan.duration_timeframe} Day(s)</li>
                                 <li>Commission: ${parseFloat(plan.commission).toFixed(2)}%</li>
                                 <li>Benefit: ${plan.benefit}</li>
                             </ul>
@@ -1077,88 +1224,23 @@ function fetchAndDisplayPlans(cryptoId) {
                             </div>
                         </div>
                     </div>
-
-                    <!-- EDIT MINING Modal -->
-                    <section class="edit_mining_popup action_overlay" style="visibility: hidden; opacity: 0;">
-                        <div class="wrapper">
-                            <header>
-                                <h4>Edit <span>${plan.name}</span> Mining</h4>
-                                <img class="close_mining" src="assets/images/c-close-svgrepo-com.svg" alt="Close" width="20">
-                            </header>
-                            <main style="display: flex; flex-direction: column; gap: 10px;">
-                                <form action="addPlan.php" method="POST">
-                                    <input type="hidden" id="selected_crypto_id" name="crypto_id" value="${cryptoId}">
-                                    <label for="name">Name*</label>
-                                    <input id="name" name="name" value="${plan.name}" type="text" placeholder="Name*" style="width: 100%;" required>
-
-                                    <label for="roi">ROI*</label>
-                                    <input id="roi" name="roi" value="${plan.roi}" type="text" placeholder="Enter ROI" style="width: 100%;" required>
-
-                                    <label for="minimum">Minimum*</label>
-                                    <input id="minimum" name="minimum" value="${plan.minimum}" type="text" placeholder="Enter Minimum" style="width: 100%;" required>
-
-                                    <label for="maximum">Maximum*</label>
-                                    <input id="maximum" name="maximum" value="${plan.maximum}" type="text" placeholder="Enter Maximum" style="width: 100%;" required>
-
-                                    <label for="earning_duration">Earning Duration*</label>
-                                    <input id="earning_duration" name="earning_duration" value="${plan.earning_duration}" type="text" placeholder="Enter Earning Duration" style="width: 100%;" required>
-
-                                    <label for="duration_timeframe">Duration Timeframe*</label>
-                                    <input id="duration_timeframe" name="duration_timeframe" value="${plan.duration_timeframe}" type="text" placeholder="Enter Duration Timeframe" style="width: 100%;" required>
-
-                                    <label for="commission">Commission*</label>
-                                    <input id="commission" name="commission" value="${plan.commission}" type="text" placeholder="Enter Commission" style="width: 100%;" required>
-
-                                    <label for="benefit">Benefit*</label>
-                                    <input id="benefit" name="benefit" value="${plan.benefit}" type="text" placeholder="Enter Benefit" style="width: 100%;" required>
-
-                                    <div style="display: flex; gap: 10px;">
-                                        <button id="close" class="close_addplan_popup negative_btn" type="button">Close</button>
-                                        <button id="edit_btn" class="positive_btn" name="button" type="submit">Save Changes</button>
-                                    </div>
-                                </form>
-                            </main>
-                        </div>
-                    </section>
                 `;
-
                 plansContainer.insertAdjacentHTML('beforeend', planCard);
             });
 
-            // Event listener for toggling dropdown visibility
-            const planCardHeaders = document.querySelectorAll('.plans-card-header');
-            const planCardDropdowns = document.querySelectorAll('.plans-card-dropdown');
+            // Now, after the plans are added, add the event listeners for toggling dropdowns
+            const planCardHeader = document.querySelectorAll('.plans-card-header');
+            const planCardDropdown = document.querySelectorAll('.plans-card-dropdown');
 
-            planCardHeaders.forEach((card, index) => {
+            planCardHeader.forEach((card, index) => {
                 card.addEventListener('click', () => {
-                    planCardDropdowns.forEach((dropdown, dropdownIndex) => {
+                    planCardDropdown.forEach((dropdown, dropdownIndex) => {
                         if (dropdownIndex === index) {
                             dropdown.style.display = dropdown.style.display === 'block' ? 'none' : 'block';
                         } else {
                             dropdown.style.display = 'none';
                         }
                     });
-                });
-            });
-
-            // Event listener for Edit Mining
-            const editMiningItems = document.querySelectorAll('.edit_mining');
-            editMiningItems.forEach(editButton => {
-                editButton.addEventListener('click', () => {
-                    // Find the closest modal to the clicked edit button
-                    const popup = editButton.closest('.plans-card').querySelector('.edit_mining_popup');
-                    popup.style.visibility = 'visible';
-                    popup.style.opacity = '1';
-                });
-            });
-
-            // Event listener for closing Edit Mining Popup
-            const closeMiningButtons = document.querySelectorAll('.close_mining');
-            closeMiningButtons.forEach(closeButton => {
-                closeButton.addEventListener('click', () => {
-                    const popup = closeButton.closest('.edit_mining_popup');
-                    popup.style.visibility = 'hidden';
-                    popup.style.opacity = '0';
                 });
             });
         } else {
@@ -1174,7 +1256,6 @@ function fetchAndDisplayPlans(cryptoId) {
 document.querySelector('.btn-back').addEventListener('click', function() {
     location.reload();  // Reload the page to refresh everything
 });
-
 
 
 
@@ -1225,13 +1306,45 @@ document.getElementById('confirm_edit_crypto').addEventListener('click', functio
             }
 
             document.getElementById('editModal').style.display = 'none';  // Hide the modal
-            alert('Crypto updated successfully!');
-            window.location.href = window.location.href; 
+
+            // Show success Toastify notification
+            Toastify({
+                text: "Crypto updated successfully!",
+                duration: 3000,  // Show the toast for 3 seconds
+                close: true,
+                gravity: "top",
+                position: "right",
+                backgroundColor: "linear-gradient(to right, #00b09b, #96c93d)", // Green success background
+            }).showToast();
+
+            // Delay the reload to allow the toast to be visible
+            setTimeout(() => {
+                window.location.href = window.location.href; // Reload the page
+            }, 3000); // 3 seconds delay to match the toast duration
         } else {
-            alert('Error: ' + data.message);
+            // Show error Toastify notification
+            Toastify({
+                text: "Error: " + data.message,
+                duration: 5000,
+                close: true,
+                gravity: "top",
+                position: "right",
+                backgroundColor: "linear-gradient(to right, #ff5f6d, #ffc371)", // Red/yellow error background
+            }).showToast();
         }
-    })
-    .catch(error => alert('An error occurred. Please try again.'));
+        })
+        .catch(error => {
+            // Show error Toastify notification for fetch errors
+            Toastify({
+                text: "An error occurred. Please try again.",
+                duration: 5000,
+                close: true,
+                gravity: "top",
+                position: "right",
+                backgroundColor: "linear-gradient(to right, #ff5f6d, #ffc371)", // Red/yellow error background
+            }).showToast();
+        });
+
 });
 // Function to open the delete modal and populate it with the selected crypto's details
 function openDeleteModal(cryptoId, cryptoName) {
@@ -1262,17 +1375,48 @@ document.getElementById('confirmDelete').addEventListener('click', function () {
                 cryptoElement.remove(); // Remove the crypto option from the DOM
             }
 
-            alert('Crypto deleted successfully!');
+            // Show success Toastify notification
+            Toastify({
+                text: "Crypto deleted successfully!",
+                duration: 3000,  // Toast will be visible for 3 seconds
+                close: true,
+                gravity: "top",
+                position: "right",
+                backgroundColor: "linear-gradient(to right, #00b09b, #96c93d)", // Green success background
+            }).showToast();
+
             closeDeleteModal();  // Close the modal
-            window.location.href = window.location.href; 
+
+            // Reload the page after the toast
+            setTimeout(() => {
+                window.location.href = window.location.href; // Reload the page
+            }, 3000); // Wait for the toast to be visible before reloading
         } else {
-            alert(`Error: ${data.message}`);
+            // Show error Toastify notification
+            Toastify({
+                text: `Error: ${data.message}`,
+                duration: 5000,  // Toast will be visible for 5 seconds
+                close: true,
+                gravity: "top",
+                position: "right",
+                backgroundColor: "linear-gradient(to right, #ff5f6d, #ffc371)", // Red/yellow error background
+            }).showToast();
         }
-    })
-    .catch(error => {
-        console.error('Deletion error:', error);
-        alert('An error occurred. Please try again.');
-    });
+        })
+        .catch(error => {
+            console.error('Deletion error:', error);
+
+            // Show error Toastify notification for fetch errors
+            Toastify({
+                text: 'An error occurred. Please try again.',
+                duration: 5000,  // Toast will be visible for 5 seconds
+                close: true,
+                gravity: "top",
+                position: "right",
+                backgroundColor: "linear-gradient(to right, #ff5f6d, #ffc371)", // Red/yellow error background
+            }).showToast();
+        });
+
 });
 
 // Event listener for the "Cancel" button to close the modal
